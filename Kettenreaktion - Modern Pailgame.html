@@ -41,6 +41,7 @@
             padding: 0;
             width: 100%;
             height: 100%;
+            height: 100dvh;
             font-family: 'Outfit', sans-serif;
             color: var(--text-main);
             overflow: hidden;
@@ -69,6 +70,7 @@
             position: relative;
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -82,11 +84,12 @@
             display: none;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             padding: 20px;
             opacity: 0;
             transition: opacity 0.4s ease-in-out;
             overflow-y: auto; /* Scrollen auf kleinen Screens für Setup erlauben */
+            -webkit-overflow-scrolling: touch;
         }
 
         .screen.active {
@@ -109,6 +112,13 @@
             flex-direction: column;
             align-items: center;
             margin: auto;
+            flex-shrink: 0;
+        }
+
+        @media (max-height: 850px) {
+            .glass-panel {
+                margin: 20px auto;
+            }
         }
 
         h1, h2, h3 {
@@ -522,7 +532,7 @@
 
         /* Für Handys im Hochformat (Kompaktes UI, maximaler Platz für Spielfeld) */
         @media (max-width: 600px) {
-            .glass-panel { padding: 20px; width: 100%; border-radius: 16px; }
+            .glass-panel { padding: 20px; width: 100%; border-radius: 16px; margin: 20px auto; }
             .screen { padding: 10px; }
             #sidebar { flex-direction: column; gap: 10px; }
             .title-box { display: none; } /* Verstecke Titel im Spiel für mehr Platz */
