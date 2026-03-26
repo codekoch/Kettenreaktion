@@ -780,7 +780,7 @@
         let container = document.getElementById('player-names-container');
         container.innerHTML = '';
         
-        const sciFiNames = ["Antimaterie", "Materie", "Dunkle Materie", "Exotische Materie", "Tachyonen", "Positronen", "Neutrinos", "Quarks"];
+        const sciFiNames = ["Materie", "Antimaterie", "Dunkle Materie", "Exotische Materie", "Tachyonen", "Positronen", "Neutrinos", "Quarks"];
         
         for(let i=0; i<count; i++) {
             let defaultName = sciFiNames[i] || `Fraktion ${i+1}`;
@@ -806,8 +806,10 @@
             players.push(name);
         }
 
-        // Spieler mischen
-        players.sort(() => Math.random() - 0.5);
+        // Spieler mischen, aber nur wenn es mehr als 2 Spieler sind
+        if (players.length > 2) {
+            players.sort(() => Math.random() - 0.5);
+        }
 
         // Nächste Zweierpotenz für Turnierbaum finden
         let n = players.length;
