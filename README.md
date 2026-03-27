@@ -3,7 +3,8 @@ Ein modernes Remake des C64-Klassikers <a href=https://archive.org/details/d64_P
 
 🚀 Live Demo
 
-[Spiele "Kettenreaktion" jetzt direkt im Browser!] <a href="https://codekoch.github.io/Kettenreaktion/Kettenreaktion - Modern Pailgame.html">⚛️ Kettenreaktion </a>(Kein Download oder Installation erforderlich!)
+ <a href="https://codekoch.github.io/Kettenreaktion/Kettenreaktion - Modern Pailgame.html">⚛️ Kettenreaktion </a>
+  <a href="https://codekoch.github.io/Kettenreaktion/KettenreaktionV2.html">⚛️ Kettenreaktion V2 - mit Spezialfeldern</a>
 
 🌌 Über das Spiel
 
