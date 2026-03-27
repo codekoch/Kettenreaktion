@@ -33,7 +33,7 @@ Lade einfach die Datei https://github.com/codekoch/Kettenreaktion/blob/main/Kett
 
 Originalspiel: The Pailgame von E. Schwan (C64)
 
-Modernes Remake & Code: codekoch
+Modernes Remake & Code: codekoch & gemini
 
 Fühl dich frei, das Repository zu forken, Pull Requests zu erstellen oder Issues zu melden, wenn du Ideen für neue Features hast (z.B. neue Partikel-Typen, AI-Gegner oder Online-Multiplayer via WebSockets).
 
