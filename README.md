@@ -23,7 +23,7 @@ Kettenreaktionen: Wenn durch eine Explosion benachbarte Felder ebenfalls ihre kr
 
 Sieg: Das Spiel endet, sobald alle Felder auf dem Raster nur noch einer einzigen Farbe gehören.
 
-Optional: Spezialfelder Schwarze Löcher und Wurmlöcher, die erst sichtbar werden, wenn ein Partikel darauf landet. Schwarze Löcher schlucken Partikel und bleiben neutral. Wurmlöcher leiten Partikel direkt zueinander um, wenn beide Wurmlöcher sufgedeckt wurden.  
+Optional: Spezialfelder Schwarze Löcher und Wurmlöcher, die erst sichtbar werden, wenn ein Partikel darauf landet. Schwarze Löcher schlucken Partikel und bleiben neutral. Wurmlöcher leiten Partikel direkt zueinander um, wenn beide Wurmlöcher aufgedeckt wurden.  
 
 
 
