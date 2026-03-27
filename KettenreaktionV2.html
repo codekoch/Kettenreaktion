@@ -168,7 +168,7 @@
             .btn-primary:hover { background: linear-gradient(45deg, var(--p1-color), var(--p2-color)); box-shadow: 0 8px 25px rgba(0, 240, 255, 0.5); }
             .match-card.active:hover { transform: scale(1.02); box-shadow: 0 4px 15px var(--p1-glow); }
             .cell:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.4); }
-            /* Hover nur wenn nicht Spezialfeld */
+            /* Hover nur wenn nicht feld */
             .cell:not([data-type="blackhole"][data-revealed="true"]):not([data-type="wormhole"][data-revealed="true"]).hover-p1:hover::after { background: var(--p1-color); box-shadow: 0 0 10px var(--p1-glow); }
             .cell:not([data-type="blackhole"][data-revealed="true"]):not([data-type="wormhole"][data-revealed="true"]).hover-p2:hover::after { background: var(--p2-color); box-shadow: 0 0 10px var(--p2-glow); }
         }
@@ -213,7 +213,7 @@
 
         select:focus, input[type="text"]:focus { border-color: var(--p1-color); }
 
-        /* Custom Checkbox Design für Spezialfelder */
+        /* Custom Checkbox Design für felder */
         .checkbox-container {
             display: flex;
             align-items: center;
@@ -417,19 +417,19 @@
 
                 <!-- Neue Optionen für Spezialfelder -->
                 <div class="setting-group" style="grid-column: 1 / -1;">
-                    <label>Spezialfelder (Versteckt)</label>
+                    <label>optinale Spezialfelder (zunächst Versteckt)</label>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; width: 100%;">
                         <label class="checkbox-container">
                             <input type="checkbox" id="opt-blackholes">
                             <div>
-                                <div style="font-weight: 600; color: var(--text-main);">Schwarze Löcher (2)</div>
+                                <div style="font-weight: 600; color: var(--text-main);">Schwarze Löcher</div>
                                 <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: none; letter-spacing: 0;">Schlucken Partikel, bleiben neutral.</div>
                             </div>
                         </label>
                         <label class="checkbox-container">
                             <input type="checkbox" id="opt-wormholes">
                             <div>
-                                <div style="font-weight: 600; color: var(--text-main);">Wurmlöcher (2)</div>
+                                <div style="font-weight: 600; color: var(--text-main);">Wurmlöcher</div>
                                 <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: none; letter-spacing: 0;">Leiten Partikel direkt zueinander um.</div>
                             </div>
                         </label>
