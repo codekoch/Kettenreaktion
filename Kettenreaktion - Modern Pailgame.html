@@ -761,7 +761,7 @@
                     style="font-size: 0.8rem; color: var(--text-muted); margin-top: -15px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">
                     Ein Pailgame Remake &copy; codekoch</div>
                 <p>Erobere das gesamte Spielfeld.<br>Setze Materie- oder Antimaterie-Partikel, um Felder zu erobern und
-                    aufzuladen. Die kritische Masse ist erreicht, wenn die Masse gleich der angrenzenden Feldern ist.
+                    aufzuladen. Die kritische Masse ist erreicht, wenn die Masse gleich der Anzahl der vertikal und horizontal angrenzenden Feldern ist.
                 </p>
 
                 <div class="settings-grid">
@@ -790,13 +790,13 @@
 
                     <!-- Neue Optionen für Spezialfelder -->
                     <div class="setting-group" style="grid-column: 1 / -1;">
-                        <label>Spezialfelder (Versteckt)</label>
+                        <label>Optionale Spezialfelder (Versteckt)</label>
                         <div
                             style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; width: 100%;">
                             <label class="checkbox-container">
                                 <input type="checkbox" id="opt-blackholes">
                                 <div>
-                                    <div style="font-weight: 600; color: var(--text-main);">Schwarze Löcher (2)</div>
+                                    <div style="font-weight: 600; color: var(--text-main);">Schwarze Löcher</div>
                                     <div
                                         style="font-size: 0.75rem; color: var(--text-muted); text-transform: none; letter-spacing: 0;">
                                         Schlucken Partikel, bleiben neutral.</div>
@@ -805,7 +805,7 @@
                             <label class="checkbox-container">
                                 <input type="checkbox" id="opt-wormholes">
                                 <div>
-                                    <div style="font-weight: 600; color: var(--text-main);">Wurmlöcher (2)</div>
+                                    <div style="font-weight: 600; color: var(--text-main);">Wurmlöcher</div>
                                     <div
                                         style="font-size: 0.75rem; color: var(--text-muted); text-transform: none; letter-spacing: 0;">
                                         Leiten Partikel direkt zueinander um.</div>
