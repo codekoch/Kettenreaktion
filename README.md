@@ -5,8 +5,6 @@ Ein modernes Remake des C64-Klassikers <a href=https://archive.org/details/d64_P
 
  <a href="https://codekoch.github.io/Kettenreaktion/Kettenreaktion - Modern Pailgame.html">⚛️ Kettenreaktion </a>
  
- <a href="https://codekoch.github.io/Kettenreaktion/KettenreaktionV2.html">⚛️ Kettenreaktion V2 - mit Spezialfeldern</a>
-
 🌌 Über das Spiel
 
 Materie gegen Antimaterie! Kettenreaktion ist ein strategisches Eroberungsspiel für 2 bis 8 Spieler. Ziel des Spiels ist es, das gesamte Spielfeld mit der eigenen Fraktion (z.B. Materie oder Antimaterie) zu dominieren.
@@ -24,6 +22,8 @@ Explosion & Übernahme: Wird die kritische Masse überschritten, explodiert das 
 Kettenreaktionen: Wenn durch eine Explosion benachbarte Felder ebenfalls ihre kritische Masse erreichen, explodieren diese sofort weiter.
 
 Sieg: Das Spiel endet, sobald alle Felder auf dem Raster nur noch einer einzigen Farbe gehören.
+
+Optional: Spezialfelder Schwarze Löcher und Wurmlöcher
 
 🛠️ Installation & Ausführen
 
