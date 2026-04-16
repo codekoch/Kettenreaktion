@@ -887,6 +887,8 @@
         let moveCount = 1;
         let isAnimating = false;
         let gameActive = false;
+        let isBotTurn = false;
+        let playerTypes = {};
 
         // Optionen & Status für Spezialfelder
         let optBlackHolesActive = false;
@@ -981,7 +983,17 @@
             const sciFiNames = ["Materie", "Antimaterie", "Dunkle Materie", "Exotische Materie", "Tachyonen", "Positronen", "Neutrinos", "Quarks"];
             for (let i = 0; i < count; i++) {
                 let defaultName = sciFiNames[i] || `Fraktion ${i + 1}`;
-                container.innerHTML += `<div class="setting-group"><label>Spieler ${i + 1}</label><input type="text" id="pname-${i}" value="${defaultName}" maxlength="20"></div>`;
+                container.innerHTML += `<div class="setting-group" style="width:100%;"><label>Spieler ${i + 1}</label>
+                    <div style="display:flex; gap:10px; width:100%;">
+                        <input type="text" id="pname-${i}" value="${defaultName}" maxlength="15" style="flex:1; min-width:0;">
+                        <select id="ptype-${i}" style="flex:1; min-width:0; padding:12px 8px; font-size:1rem; border-radius:8px; background:rgba(0,0,0,0.3); color:var(--text-main); border:1px solid var(--glass-border);">
+                            <option value="human">Mensch</option>
+                            <option value="easy">KI (Leicht)</option>
+                            <option value="medium">KI (Mittel)</option>
+                            <option value="hard">KI (Schwer)</option>
+                        </select>
+                    </div>
+                </div>`;
             }
         }
 
@@ -992,9 +1004,14 @@
 
             let count = parseInt(document.getElementById('player-count').value);
             let players = [];
+            playerTypes = {};
             for (let i = 0; i < count; i++) {
-                let name = document.getElementById(`pname-${i}`).value.trim();
-                players.push(name || `Spieler ${i + 1}`);
+                let rawName = document.getElementById(`pname-${i}`).value.trim() || `Spieler ${i + 1}`;
+                let type = document.getElementById(`ptype-${i}`).value;
+                let name = rawName;
+                while(players.includes(name)) name += " I";
+                players.push(name);
+                playerTypes[name] = type;
             }
             if (players.length > 2) players.sort(() => Math.random() - 0.5);
 
@@ -1140,7 +1157,7 @@
         }
 
         function handleCellClick(r, c) {
-            if (!gameActive || isAnimating) return;
+            if (!gameActive || isAnimating || isBotTurn) return;
             const cell = board[r][c];
 
             // Regel: Schwarze Löcher blockieren den Klick nicht per se, fressen aber den Zug. 
@@ -1318,6 +1335,130 @@
                 indicator.className = 'turn-indicator turn-p2';
                 boardEl.querySelectorAll('.cell').forEach(c => { c.classList.remove('hover-p1'); c.classList.add('hover-p2'); });
             }
+            
+            let pType = playerTypes[activeName];
+            if (pType && pType !== 'human') {
+                isBotTurn = true;
+                setTimeout(() => {
+                    triggerBotMove(pType);
+                }, 800);
+            } else {
+                isBotTurn = false;
+            }
+        }
+
+        function getActualTarget(r, c) {
+            let cell = board[r][c];
+            if (cell.type === 'wormhole' && revealedWormholesCount === 2) {
+                const other = wormholeCoords.find(w => w.r !== r || w.c !== c);
+                if (other) return {r: other.r, c: other.c, cell: board[other.r][other.c]};
+            }
+            return {r, c, cell};
+        }
+
+        function triggerBotMove(type) {
+            if (!gameActive) return;
+            
+            let validMoves = [];
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    let cell = board[r][c];
+                    // Bekannte schwarze Löcher absolut meiden!
+                    if (cell.type === 'blackhole' && cell.revealed) continue;
+                    
+                    if (cell.owner === null || cell.owner === currentPlayer) {
+                        validMoves.push({r, c});
+                    }
+                }
+            }
+
+            if (validMoves.length === 0) return; // Sollte nie passieren, außer Game Over
+
+            let bestMove = validMoves[0];
+
+            if (type === 'easy') {
+                // Leicht: Komplett zufälliger gültiger Zug
+                bestMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+            } else if (type === 'medium') {
+                // Mittel: Bevorzugt Felder, die eine sofortige Explosion (Kettenreaktion) auslösen
+                let explodingMoves = [];
+                for (let m of validMoves) {
+                    let target = getActualTarget(m.r, m.c);
+                    if (target.cell.points === target.cell.capacity - 1) {
+                        explodingMoves.push(m);
+                    }
+                }
+                if (explodingMoves.length > 0) {
+                    bestMove = explodingMoves[Math.floor(Math.random() * explodingMoves.length)];
+                } else {
+                    bestMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+                }
+            } else if (type === 'hard') {
+                // Schwer: Punktebasiertes Auswertungssystem mit Risikoanalyse
+                let bestScore = -Infinity;
+                let candidates = [];
+                
+                for (let m of validMoves) {
+                    let target = getActualTarget(m.r, m.c);
+                    let score = 0;
+                    
+                    // Löst das eigene Feld eine Explosion aus?
+                    if (target.cell.points === target.cell.capacity - 1) {
+                        score += 100; // Sehr gut
+                        
+                        const neighbors = [[target.r - 1, target.c], [target.r + 1, target.c], [target.r, target.c - 1], [target.r, target.c + 1]];
+                        neighbors.forEach(([nr, nc]) => {
+                            if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
+                                let ntarget = getActualTarget(nr, nc); 
+                                let ncell = ntarget.cell;
+                                if (ncell.owner !== null && ncell.owner !== currentPlayer) {
+                                    score += ncell.points * 10; // Gegnerische Partikel übernehmen bringt Punkte
+                                    if (ncell.points === ncell.capacity - 1) {
+                                        score += 50; // Bedrohlich starkes gegnerisches Feld übernehmen ist optimal!
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        // Defensive Bewertung: Vermeide direkt neben gegnerischen Feldern zu bauen, die kurz vor der Explosion stehen!
+                        let danger = false;
+                        const neighbors = [[target.r - 1, target.c], [target.r + 1, target.c], [target.r, target.c - 1], [target.r, target.c + 1]];
+                        neighbors.forEach(([nr, nc]) => {
+                            if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
+                                let ntarget = getActualTarget(nr, nc); 
+                                let ncell = ntarget.cell;
+                                if (ncell.owner !== null && ncell.owner !== currentPlayer) {
+                                    if (ncell.points === ncell.capacity - 1) {
+                                        danger = true;
+                                    }
+                                }
+                            }
+                        });
+                        if (danger) {
+                            score -= 50; // Achtung Gefahr! Niemals hier etwas aufbauen!
+                        }
+                        
+                        // Positions-Strategie: Ecken (Kapazität 2) > Ränder (3) > Mitte (4)
+                        if (target.cell.capacity === 2) score += 5;
+                        else if (target.cell.capacity === 3) score += 2;
+                        
+                        // Bevorzuge es, bestehende eigene Felder aufzubauen statt komplett neue anzufangen
+                        if (target.cell.owner === currentPlayer) {
+                            score += 1;
+                        }
+                    }
+                    
+                    if (score > bestScore) {
+                        bestScore = score;
+                        candidates = [m];
+                    } else if (score === bestScore) {
+                        candidates.push(m);
+                    }
+                }
+                bestMove = candidates[Math.floor(Math.random() * candidates.length)];
+            }
+
+            makeMove(bestMove.r, bestMove.c, currentPlayer);
         }
 
         function renderBoard() {
