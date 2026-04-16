@@ -692,14 +692,28 @@
             .status-card {
                 flex: 1;
                 padding: 15px;
-                display: flex;
+                display: grid;
+                grid-template-areas: 
+                    "player player"
+                    "zug stats";
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
                 align-items: center;
-                justify-content: space-between;
-                gap: 10px;
+            }
+            
+            .turn-indicator {
+                grid-area: player;
+                margin: 0;
             }
 
             .move-counter {
+                grid-area: zug;
                 margin-bottom: 0;
+            }
+            
+            #particle-stats {
+                grid-area: stats;
+                margin-top: 0 !important;
             }
 
             #board {
@@ -740,13 +754,27 @@
             }
 
             .status-card {
-                padding: 10px 15px;
+                padding: 10px;
+                gap: 8px;
                 border-radius: 12px;
             }
 
             .turn-indicator {
                 padding: 8px;
                 font-size: 1.2rem;
+            }
+            
+            #particle-stats {
+                padding: 8px !important;
+                gap: 5px !important;
+            }
+
+            #particle-stats div, #particle-stats span {
+                font-size: 0.75rem !important;
+            }
+
+            #particle-stats strong {
+                font-size: 0.9rem !important;
             }
         }
     </style>
