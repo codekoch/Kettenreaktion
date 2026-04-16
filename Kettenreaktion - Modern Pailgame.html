@@ -150,6 +150,7 @@
             font-size: clamp(2rem, 5vw, 3rem);
             background: linear-gradient(to right, var(--p1-color), var(--p2-color));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 20px;
         }
@@ -365,6 +366,7 @@
             font-size: 1.5rem;
             background: linear-gradient(90deg, var(--text-main), var(--text-muted));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -842,6 +844,22 @@
                     <div class="status-card">
                         <div class="move-counter" id="move-counter">Zug 0001</div>
                         <div class="turn-indicator" id="turn-indicator">Spieler 1</div>
+                        <div id="particle-stats" style="margin-top:20px; font-size: 1rem; color: var(--text-muted); display:flex; flex-direction:column; gap:10px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; border: 1px solid var(--glass-border);">
+                            <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Masse im Universum</div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span id="stat-p1-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60%;">P1</span>
+                                <strong style="color:var(--p1-color); font-size: 1.2rem; text-shadow: 0 0 10px var(--p1-glow);" id="stat-p1-count">0</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span id="stat-p2-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60%;">P2</span>
+                                <strong style="color:var(--p2-color); font-size: 1.2rem; text-shadow: 0 0 10px var(--p2-glow);" id="stat-p2-count">0</strong>
+                            </div>
+                            <hr style="border:none; border-top:1px solid rgba(255,255,255,0.1); width:100%; margin:5px 0;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; font-weight: bold; color: var(--text-main);">
+                                <span>Gesamt</span>
+                                <strong id="stat-total-count" style="font-size: 1.2rem;">0</strong>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div id="board-container">
@@ -1318,6 +1336,33 @@
                     orbEl.innerText = cellData.points > 1 ? cellData.points : '';
                 }
             }
+            updateParticleStats();
+        }
+
+        function updateParticleStats() {
+            let p1Particles = 0;
+            let p2Particles = 0;
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (board[r][c].type === 'blackhole') continue;
+                    if (board[r][c].owner === 1) p1Particles += board[r][c].points;
+                    if (board[r][c].owner === 2) p2Particles += board[r][c].points;
+                }
+            }
+            const p1Name = tournament.currentMatch ? tournament.currentMatch.p1 : "Spieler 1";
+            const p2Name = tournament.currentMatch ? tournament.currentMatch.p2 : "Spieler 2";
+            
+            const p1NameEl = document.getElementById('stat-p1-name');
+            const p2NameEl = document.getElementById('stat-p2-name');
+            if (p1NameEl) p1NameEl.innerText = p1Name;
+            if (p2NameEl) p2NameEl.innerText = p2Name;
+            
+            const p1CountEl = document.getElementById('stat-p1-count');
+            const p2CountEl = document.getElementById('stat-p2-count');
+            const totalCountEl = document.getElementById('stat-total-count');
+            if (p1CountEl) p1CountEl.innerText = p1Particles;
+            if (p2CountEl) p2CountEl.innerText = p2Particles;
+            if (totalCountEl) totalCountEl.innerText = p1Particles + p2Particles;
         }
     </script>
 </body>
