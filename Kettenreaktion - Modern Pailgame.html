@@ -1376,6 +1376,7 @@
             optRetroThemeActive = isActive;
             if (isActive) document.body.classList.add('retro-theme');
             else document.body.classList.remove('retro-theme');
+            if (typeof gameActive !== 'undefined' && gameActive) renderBoard();
         }
 
         window.onload = () => updatePlayerInputs();
@@ -1859,7 +1860,11 @@
                     cellEl.dataset.type = cellData.type;
                     cellEl.dataset.revealed = cellData.revealed;
 
-                    orbEl.innerText = cellData.points > 1 ? cellData.points : '';
+                    if (optRetroThemeActive) {
+                        orbEl.innerText = cellData.points > 0 ? cellData.points : '';
+                    } else {
+                        orbEl.innerText = cellData.points > 1 ? cellData.points : '';
+                    }
                 }
             }
             updateParticleStats();
