@@ -15,7 +15,7 @@ Setze deine Partikel clever ein, lade die Felder auf und erreiche die kritische 
 
 Partikel setzen: Klicke auf ein leeres Feld oder ein Feld deiner Farbe, um ein Partikel zu platzieren.
 
-Kritische Masse: Ein Feld kann nur eine begrenzte Menge an Masse aufnehmen. Die kritische Masse ist erreicht, wenn die Masse gleich der Anzahl der angrenzenden Felder ist. (Ein Feld in der Mitte explodiert bei 4, am Rand bei 3, in der Ecke bei 2).
+Kritische Masse: Ein Feld kann nur eine begrenzte Menge an Masse aufnehmen. Die kritische Masse ist erreicht, wenn die Masse größer als die Anzahl der angrenzenden Felder ist. (Ein Feld in der Mitte explodiert bei 5, am Rand bei 4, in der Ecke bei 3).
 
 Explosion & Übernahme: Wird die kritische Masse überschritten, explodiert das Feld. Die Masse verteilt sich auf die benachbarten Felder und übernimmt diese in deine Farbe.
 
