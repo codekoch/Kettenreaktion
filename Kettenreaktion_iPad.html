@@ -1,0 +1,1934 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="color-scheme" content="dark">
+    <!-- WICHTIG FÜR MOBILE: Verhindert versehentliches Zoomen beim schnellen Tippen -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kettenreaktion</title>
+    <!-- Moderne, geometrische Schriftart -->
+    <!-- Moderne, geometrische Schriftart und Retro-Terminal Schriftart -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: dark;
+            /* Modernes Dark-Mode Farbpaletten-System */
+            --bg-dark: #0f111a;
+            --bg-gradient-1: #1a1d2d;
+            --bg-gradient-2: #0f111a;
+
+            /* Glassmorphismus */
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+
+            /* Neon Spielerfarben */
+            --p1-color: #00f0ff;
+            /* Neon Cyan (Materie) */
+            --p1-glow: rgba(0, 240, 255, 0.5);
+
+            --p2-color: #ff0055;
+            /* Neon Pink (Antimaterie) */
+            --p2-glow: rgba(255, 0, 85, 0.5);
+
+            /* Neue Spezial-Farben */
+            --blackhole-glow: rgba(120, 0, 255, 0.8);
+            --wormhole-glow: rgba(255, 165, 0, 1.0);
+
+            --text-main: #ffffff;
+            --text-muted: #b5b5b5;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-main);
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
+            touch-action: manipulation;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 0, 85, 0.03) 0%, transparent 40%);
+            animation: bgDrift 20s infinite alternate ease-in-out;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes bgDrift {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(-5%, -5%) rotate(5deg);
+            }
+        }
+
+        #app {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+
+        .screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .screen.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: var(--glass-shadow);
+            padding: 40px;
+            max-width: 800px;
+            width: 95%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: auto;
+            flex-shrink: 0;
+        }
+
+        @media (max-height: 1050px), (max-width: 1100px) {
+            .glass-panel {
+                margin: 10px auto;
+                padding: 15px 20px;
+            }
+            h1 {
+                margin-bottom: 5px;
+                font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+            }
+            p {
+                margin-bottom: 10px;
+                font-size: clamp(0.75rem, 1.8vw, 0.9rem);
+                line-height: 1.3;
+            }
+            .btn {
+                margin-top: 15px;
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+            .settings-grid {
+                gap: 10px;
+                margin-top: 10px;
+                padding-top: 10px;
+            }
+            .setting-group label {
+                margin-bottom: 4px;
+                font-size: 0.8rem;
+            }
+            select, input[type="text"] {
+                padding: 8px;
+                font-size: 0.95rem;
+            }
+            .checkbox-container {
+                padding: 5px 10px;
+                gap: 8px;
+            }
+        }
+
+        h1,
+        h2,
+        h3 {
+            margin-top: 0;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            background: linear-gradient(to right, var(--p1-color), var(--p2-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: var(--text-muted);
+            text-align: center;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px 40px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 30px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--p1-color), var(--p2-color));
+            border: none;
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 0, 85, 0.3);
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .btn:hover {
+                background: var(--text-main);
+                color: var(--bg-dark);
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+            }
+
+            .btn-primary:hover {
+                background: linear-gradient(45deg, var(--p1-color), var(--p2-color));
+                box-shadow: 0 8px 25px rgba(0, 240, 255, 0.5);
+            }
+
+            .match-card.active:hover {
+                transform: scale(1.02);
+                box-shadow: 0 4px 15px var(--p1-glow);
+            }
+
+            .cell:hover {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(255, 255, 255, 0.4);
+            }
+
+            /* Hover nur wenn nicht Spezialfeld */
+            .cell:not([data-type="blackhole"][data-revealed="true"]):not([data-type="wormhole"][data-revealed="true"]).hover-p1:hover::after {
+                background: var(--p1-color);
+                box-shadow: 0 0 10px var(--p1-glow);
+            }
+
+            .cell:not([data-type="blackhole"][data-revealed="true"]):not([data-type="wormhole"][data-revealed="true"]).hover-p2:hover::after {
+                background: var(--p2-color);
+                box-shadow: 0 0 10px var(--p2-glow);
+            }
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+            gap: 20px;
+            width: 100%;
+            margin-top: 20px;
+            border-top: 1px solid var(--glass-border);
+            padding-top: 20px;
+        }
+
+        .setting-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        select,
+        input[type="text"] {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            padding: 12px;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        select:focus,
+        input[type="text"]:focus {
+            border-color: var(--p1-color);
+        }
+
+        /* Custom Checkbox Design für Spezialfelder */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            transition: border-color 0.3s;
+            width: 100%;
+        }
+
+        .checkbox-container:hover {
+            border-color: var(--p1-color);
+        }
+
+        .checkbox-container input {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--p1-color);
+            cursor: pointer;
+            margin: 0;
+        }
+
+        #player-names-container {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .match-list {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .match-card {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .match-card.active {
+            border-color: var(--p1-color);
+            background: rgba(0, 240, 255, 0.05);
+            cursor: pointer;
+        }
+
+        .match-vs {
+            font-size: clamp(1.1rem, 3vw, 1.4rem);
+            font-weight: 600;
+        }
+
+        .match-status {
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        .winner-text {
+            color: var(--p1-color);
+            font-weight: bold;
+        }
+
+        #game-layout {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            max-width: 1200px;
+            height: 100%;
+            gap: 30px;
+            padding: 10px;
+        }
+
+        #sidebar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .title-box h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            background: linear-gradient(90deg, var(--text-main), var(--text-muted));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .title-box div {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .status-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .move-counter {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .turn-indicator {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 800;
+            padding: 15px 10px;
+            border-radius: 12px;
+            transition: all 0.4s ease;
+            text-transform: uppercase;
+            word-wrap: break-word;
+        }
+
+        /* Dynamische Spielerklassen */
+        .turn-p1 {
+            color: var(--p1-color);
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+        }
+
+        .turn-p2 {
+            color: var(--p2-color);
+            background: rgba(255, 0, 85, 0.1);
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.2);
+        }
+
+        #board-container {
+            flex: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--glass-bg);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
+            padding: 15px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.05), var(--glass-shadow);
+            position: relative;
+        }
+
+        #board {
+            display: grid;
+            gap: 6px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            width: 100%;
+            height: 100%;
+            max-width: min(90vw, 75vh);
+            max-height: min(90vw, 75vh);
+            aspect-ratio: 1/1;
+        }
+
+        .cell {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: background 0.2s, border-color 0.2s;
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ----- SPEZIALFELDER STYLING ----- */
+        /* Schwarzes Loch */
+        .cell[data-type="blackhole"][data-revealed="true"] {
+            background: #020005;
+            border-color: #1a0033;
+            box-shadow: inset 0 0 20px #000;
+        }
+
+        .cell[data-type="blackhole"][data-revealed="true"]::before {
+            content: '';
+            position: absolute;
+            width: 70%;
+            height: 70%;
+            border-radius: 50%;
+            background: radial-gradient(circle, #000 40%, var(--blackhole-glow) 90%, transparent);
+            box-shadow: 0 0 15px var(--blackhole-glow);
+            animation: pulseBlackHole 2s infinite alternate;
+        }
+
+        @keyframes pulseBlackHole {
+            0% {
+                transform: scale(0.9);
+                box-shadow: 0 0 10px var(--blackhole-glow);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(1.1);
+                box-shadow: 0 0 25px var(--blackhole-glow);
+                opacity: 1;
+            }
+        }
+
+        /* Wurmloch */
+        .cell[data-type="wormhole"][data-revealed="true"]:not([data-owner="1"]):not([data-owner="2"]) {
+            border-color: rgba(255, 165, 0, 0.4);
+            background: rgba(255, 165, 0, 0.05);
+            box-shadow: inset 0 0 15px rgba(255, 165, 0, 0.1);
+        }
+
+        .cell[data-type="wormhole"][data-revealed="true"]::before {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, var(--p1-color), transparent, var(--wormhole-glow), transparent, var(--p1-color));
+            animation: spinWormhole 4s linear infinite;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        /* Wurmloch Portal Mitte */
+        .cell[data-type="wormhole"][data-revealed="true"]::after {
+            content: '';
+            position: absolute;
+            width: 30%;
+            height: 30%;
+            border-radius: 50%;
+            background: #000;
+            box-shadow: 0 0 10px #000, 0 0 20px var(--wormhole-glow);
+            z-index: 0;
+        }
+
+        @keyframes spinWormhole {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Orb z-index anpassen, damit er über Wurmloch-Effekt liegt */
+        .orb {
+            width: 0%;
+            height: 0%;
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .cell[data-points="1"] .orb {
+            width: 35%;
+            height: 35%;
+            opacity: 1;
+        }
+
+        .cell[data-points="2"] .orb {
+            width: 55%;
+            height: 55%;
+            opacity: 1;
+            font-size: 1.2rem;
+        }
+
+        .cell[data-points="3"] .orb {
+            width: 75%;
+            height: 75%;
+            opacity: 1;
+            font-size: 1.5rem;
+        }
+
+        .cell[data-points="4"] .orb {
+            width: 90%;
+            height: 90%;
+            opacity: 1;
+            font-size: 1.8rem;
+        }
+
+        .cell[data-points="5"] .orb {
+            width: 100%;
+            height: 100%;
+            opacity: 1;
+            font-size: 2rem;
+        }
+
+        .cell[data-owner="1"] .orb {
+            background: radial-gradient(circle at 30% 30%, #ffffff, var(--p1-color));
+            box-shadow: 0 0 15px var(--p1-glow), inset -2px -2px 10px rgba(0, 0, 0, 0.2);
+            color: var(--bg-dark);
+        }
+
+        .cell[data-owner="2"] .orb {
+            background: radial-gradient(circle at 70% 70%, #000000, var(--p2-color));
+            box-shadow: 0 0 15px var(--p2-glow), inset 2px 2px 10px rgba(255, 255, 255, 0.4);
+            color: #ffffff;
+            border: 2px dashed rgba(255, 255, 255, 0.6);
+        }
+
+        /* Rahmen Normal & Besitzer für Wurmlöcher */
+        .cell[data-owner="1"]:not([data-type="blackhole"]) {
+            border-color: var(--p1-color);
+            box-shadow: inset 0 0 15px rgba(0, 240, 255, 0.15), 0 0 8px rgba(0, 240, 255, 0.4);
+            background: rgba(0, 240, 255, 0.05);
+        }
+
+        .cell[data-owner="2"]:not([data-type="blackhole"]) {
+            border-color: var(--p2-color);
+            box-shadow: inset 0 0 15px rgba(255, 0, 85, 0.15), 0 0 8px rgba(255, 0, 85, 0.4);
+            background: rgba(255, 0, 85, 0.05);
+        }
+
+        .explode-anim {
+            animation: annihilationPop 0.4s ease-out forwards;
+        }
+
+        @keyframes annihilationPop {
+            0% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+
+            40% {
+                transform: scale(1.5);
+                filter: brightness(2) contrast(1.5);
+                box-shadow: 0 0 40px #ffffff;
+            }
+
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        .explode-anim-modern {
+            animation: popAndSettle 0.4s ease-out forwards;
+        }
+
+        @keyframes popAndSettle {
+            0% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+
+            40% {
+                transform: scale(1.3);
+                filter: brightness(2) contrast(1.5);
+                box-shadow: 0 0 40px #ffffff;
+            }
+
+            100% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+
+            .cell.hover-p1:hover::after,
+            .cell.hover-p2:hover::after {
+                content: '';
+                position: absolute;
+                width: 20%;
+                height: 20%;
+                border-radius: 50%;
+                opacity: 0.3;
+            }
+        }
+
+        #game-over-screen {
+            background: rgba(15, 17, 26, 0.9);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+        }
+
+        .trophy {
+            font-size: clamp(3rem, 10vw, 5rem);
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        @media (max-width: 900px) {
+            #game-layout {
+                flex-direction: column;
+                justify-content: center;
+                gap: 15px;
+            }
+
+            #sidebar {
+                flex: none;
+                flex-direction: row;
+                gap: 15px;
+                align-items: stretch;
+            }
+
+            .title-box {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            .status-card {
+                flex: 1;
+                padding: 15px;
+                display: grid;
+                grid-template-areas:
+                    "player player"
+                    "zug stats";
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+                align-items: center;
+            }
+
+            .turn-indicator {
+                grid-area: player;
+                margin: 0;
+            }
+
+            .move-counter {
+                grid-area: zug;
+                margin-bottom: 0;
+            }
+
+            #particle-stats {
+                grid-area: stats;
+                margin-top: 0 !important;
+            }
+
+            #board {
+                gap: 4px;
+                padding: 6px;
+            }
+
+            .cell {
+                border-radius: 8px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .glass-panel {
+                padding: 20px;
+                width: 100%;
+                border-radius: 16px;
+                margin: 20px auto;
+            }
+
+            .screen {
+                padding: 10px;
+            }
+
+            #sidebar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .title-box {
+                display: none;
+            }
+
+            #board-container {
+                padding: 10px;
+                border-radius: 16px;
+                border-width: 1px;
+            }
+
+            .status-card {
+                padding: 10px;
+                gap: 8px;
+                border-radius: 12px;
+            }
+
+            .turn-indicator {
+                padding: 8px;
+                font-size: 1.2rem;
+            }
+
+            #particle-stats {
+                padding: 8px !important;
+                gap: 5px !important;
+            }
+
+            #particle-stats div,
+            #particle-stats span {
+                font-size: 0.75rem !important;
+            }
+
+            #particle-stats strong {
+                font-size: 0.9rem !important;
+            }
+        }
+
+        /* --- RETRO THEME (EXTREME PIP-BOY) --- */
+        body.retro-theme {
+            --bg-dark: #000c05;
+            --bg-gradient-1: #001408;
+            --bg-gradient-2: #000c05;
+            --p1-color: #ffb642;
+            --p1-glow: rgba(255, 182, 66, 0.8);
+            --p2-color: #ff2244;
+            --p2-glow: rgba(255, 34, 68, 0.8);
+            --text-main: #1aff80;
+            --text-muted: #11aa55;
+            --glass-bg: rgba(0, 15, 5, 0.95);
+            --glass-border: #1aff80;
+            --glass-shadow: none;
+            --blackhole-glow: rgba(26, 255, 128, 0.4);
+            --wormhole-glow: rgba(26, 255, 128, 0.5);
+
+            font-family: 'VT323', 'Courier New', Courier, monospace;
+            text-transform: uppercase;
+            text-shadow: 0 0 5px currentColor;
+            color: var(--text-main);
+            background-color: var(--bg-dark);
+        }
+
+        body.retro-theme * {
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+
+        body.retro-theme h1, body.retro-theme h2, body.retro-theme h3 {
+            letter-spacing: 4px !important;
+        }
+
+        body.retro-theme .btn {
+            border: 2px solid var(--text-main);
+            background: #000;
+            color: var(--text-main);
+            text-shadow: inherit;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        body.retro-theme .btn::before {
+            content: "[ ";
+        }
+
+        body.retro-theme .btn::after {
+            content: " ]";
+        }
+
+        body.retro-theme .btn:hover, body.retro-theme .btn-primary:hover {
+            background: var(--text-main);
+            color: #000c05;
+            text-shadow: none;
+        }
+
+        body.retro-theme .glass-panel {
+            background: transparent;
+            border: 2px solid var(--text-main);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            position: relative;
+        }
+        
+        body.retro-theme .glass-panel::before {
+            content: "";
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: rgba(0, 20, 5, 0.8);
+            z-index: -1;
+        }
+
+        body.retro-theme h1 {
+            background: none;
+            -webkit-text-fill-color: var(--text-main);
+            color: var(--text-main);
+            text-shadow: 0 0 10px var(--text-main) !important;
+        }
+
+        body.retro-theme .turn-indicator,
+        body.retro-theme #stat-p1-count,
+        body.retro-theme #stat-p2-count,
+        body.retro-theme #stat-p1-name,
+        body.retro-theme #stat-p2-name,
+        body.retro-theme #winner-text,
+        body.retro-theme .match-vs,
+        body.retro-theme .match-status {
+            text-shadow: 0 0 10px currentColor !important;
+        }
+
+        body.retro-theme #board-container {
+            border: 2px solid var(--text-main);
+            background: rgba(0, 20, 5, 0.5);
+        }
+
+        body.retro-theme .cell {
+            border: 1px dotted var(--text-muted);
+            background: #000;
+        }
+
+        body.retro-theme .cell[data-owner="1"] { border: 2px solid var(--p1-color); color: var(--p1-color); background: rgba(255, 182, 66, 0.15); }
+        body.retro-theme .cell[data-owner="2"] { border: 2px solid var(--p2-color); color: var(--p2-color); background: rgba(255, 34, 68, 0.15); }
+
+        body.retro-theme .cell[data-type="blackhole"][data-revealed="true"] {
+            border: 2px dashed var(--text-muted);
+            background: #000 !important;
+        }
+
+        body.retro-theme .cell[data-type="blackhole"][data-revealed="true"]::before {
+            display: block !important;
+            content: '';
+            position: absolute;
+            width: 75%;
+            height: 75%;
+            border-radius: 50% !important;
+            background: radial-gradient(circle, #000 40%, var(--blackhole-glow) 90%, transparent) !important;
+            box-shadow: 0 0 15px var(--blackhole-glow) !important;
+            animation: pulseBlackHole 2s infinite alternate !important;
+        }
+
+
+
+        body.retro-theme .orb {
+            background: none !important;
+            box-shadow: none !important;
+            color: inherit !important;
+            border: none !important;
+            font-weight: normal;
+            font-size: 2rem !important;
+            text-shadow: 0 0 8px currentColor;
+        }
+
+        body.retro-theme .explode-anim {
+            animation: retroAnnihilationPop 0.4s ease-out forwards !important;
+        }
+
+        body.retro-theme .explode-anim-modern {
+            animation: retroPopAndSettle 0.4s ease-out forwards !important;
+        }
+
+        @keyframes retroAnnihilationPop {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.5); text-shadow: 0 0 20px #ffffff, 0 0 30px currentColor; color: #ffffff; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        @keyframes retroPopAndSettle {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.3); text-shadow: 0 0 20px #ffffff, 0 0 30px currentColor; color: #ffffff; }
+            100% { transform: scale(1); }
+        }
+
+        body.retro-theme::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 2px,
+                transparent 2px,
+                transparent 4px
+            );
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        body.retro-theme::after {
+            content: " ";
+            display: block;
+            pointer-events: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
+            z-index: 9999;
+        }
+
+
+        body.retro-theme .screen {
+            animation: crtflicker 0.12s infinite;
+        }
+
+        @keyframes crtflicker {
+            0% { opacity: 0.96; }
+            50% { opacity: 1; text-shadow: 0 0 8px currentColor; }
+            100% { opacity: 0.98; }
+        }
+
+        body.retro-theme .turn-indicator {
+            background: rgba(0, 20, 5, 0.8);
+            border: 2px solid currentColor;
+            letter-spacing: 2px;
+        }
+        
+        body.retro-theme label {
+            color: var(--text-main);
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+        
+        body.retro-theme input[type="text"], body.retro-theme select {
+            font-family: inherit;
+            text-transform: uppercase;
+            border: 2px solid var(--text-main);
+            color: var(--text-main);
+            background: #000;
+            padding: 10px;
+            margin-top: 5px;
+        }
+
+        body.retro-theme select option {
+            background: #000;
+            color: var(--text-main);
+        }
+        
+        body.retro-theme .checkbox-container {
+            border: 1px dotted var(--text-muted);
+            background: rgba(0, 20, 5, 0.8);
+        }
+        
+        body.retro-theme .checkbox-container:hover {
+            border-color: var(--text-main);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="app">
+        <!-- Startbildschirm -->
+        <div id="start-screen" class="screen active">
+            <div class="glass-panel">
+                <h1>KETTENREAKTION</h1>
+                <div
+                    style="font-size: 0.8rem; color: var(--text-muted); margin-top: -15px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">
+                    Ein Pailgame Remake &copy; codekoch</div>
+                <p>Setze Materie- oder Antimaterie-Partikel, um Felder zu erobern und
+                    aufzuladen. Sobald die Massenzahl die Anzahl der angrenzenden
+                    Felder überschreitet, ist die kritische Masse erreicht und die Partikel erobern alle
+                    umliegenden Felder. Ziel des Spiels ist es, das gesamte Spielfeld zu erobern.
+                    <br>(Hinweis für iPads: Wenn der Bildschirm nach dem Einblenden der iPad Tastatur verschoben ist,
+                    kann dies durch Verkleinern und Vergößern des Bildschirms behoben werden.)
+                </p>
+
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <label for="board-size">Spielfeldgröße</label>
+                        <select id="board-size">
+                            <option value="4">4 x 4 (Kurz)</option>
+                            <option value="6" selected>6 x 6 (Standard)</option>
+                            <option value="8">8 x 8 (Lang)</option>
+                            <option value="10">10 x 10 (Episch)</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="player-count">Teilnehmer</label>
+                        <select id="player-count" onchange="updatePlayerInputs()">
+                            <option value="2" selected>2 Spieler</option>
+                            <option value="3">3 Spieler</option>
+                            <option value="4">4 Spieler</option>
+                            <option value="5">5 Spieler</option>
+                            <option value="6">6 Spieler</option>
+                            <option value="7">7 Spieler</option>
+                            <option value="8">8 Spieler</option>
+                        </select>
+                    </div>
+
+                    <!-- Optionen -->
+                    <div class="setting-group" style="grid-column: 1 / -1;">
+                        <label>Optionen</label>
+                        <div
+                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 15px; width: 100%;">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="opt-blackholes">
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text-main);">Schwarze Löcher</div>
+                                    <div
+                                        style="font-size: 0.75rem; color: var(--text-muted); text-transform: none; letter-spacing: 0;">
+                                        Schlucken Partikel, bleiben neutral.</div>
+                                </div>
+                            </label>
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="opt-wormholes">
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text-main);">Wurmlöcher</div>
+                                    <div
+                                        style="font-size: 0.75rem; color: var(--text-muted); text-transform: none; letter-spacing: 0;">
+                                        Leiten Partikel direkt zueinander um.</div>
+                                </div>
+                            </label>
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="opt-pailgame">
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text-main);">Pailgame Modus</div>
+                                    <div
+                                        style="font-size: 0.75rem; color: var(--text-muted); text-transform: none; letter-spacing: 0;">
+                                        kritische Masse=angrenzende Felder</div>
+                                </div>
+                            </label>
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="opt-retrotheme" onchange="toggleRetroTheme(this.checked)">
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text-main);">Retro Modus</div>
+                                    <div
+                                        style="font-size: 0.75rem; color: var(--text-muted); text-transform: none; letter-spacing: 0;">
+                                        Klassische CRT-Terminal Optik mit 8-Bit Sound.</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="player-names-container">
+                        <!-- Wird per JS befüllt -->
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="startTournament()">Turnier Starten</button>
+            </div>
+        </div>
+
+        <!-- Turnierbaum Screen -->
+        <div id="tournament-screen" class="screen">
+            <div class="glass-panel">
+                <h2 id="round-title">Turnier</h2>
+                <div class="match-list" id="tournament-content"></div>
+            </div>
+        </div>
+
+        <!-- Hauptspiel -->
+        <div id="game-screen" class="screen">
+            <div id="game-layout">
+                <div id="sidebar">
+                    <div class="glass-panel title-box" style="padding: 15px;">
+                        <h2>KETTENREAKTION</h2>
+                        <div>Ein Pailgame Remake &copy; codekoch</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="move-counter" id="move-counter">Zug 0001</div>
+                        <div class="turn-indicator" id="turn-indicator">Spieler 1</div>
+                        <div id="particle-stats"
+                            style="margin-top:20px; font-size: 1rem; color: var(--text-muted); display:flex; flex-direction:column; gap:10px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; border: 1px solid var(--glass-border);">
+                            <div
+                                style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
+                                Masse im Universum</div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span id="stat-p1-name"
+                                    style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60%;">P1</span>
+                                <strong
+                                    style="color:var(--p1-color); font-size: 1.2rem; text-shadow: 0 0 10px var(--p1-glow);"
+                                    id="stat-p1-count">0</strong>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span id="stat-p2-name"
+                                    style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60%;">P2</span>
+                                <strong
+                                    style="color:var(--p2-color); font-size: 1.2rem; text-shadow: 0 0 10px var(--p2-glow);"
+                                    id="stat-p2-count">0</strong>
+                            </div>
+                            <hr
+                                style="border:none; border-top:1px solid rgba(255,255,255,0.1); width:100%; margin:5px 0;">
+                            <div
+                                style="display:flex; justify-content:space-between; align-items:center; font-weight: bold; color: var(--text-main);">
+                                <span>Gesamt</span>
+                                <strong id="stat-total-count" style="font-size: 1.2rem;">0</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="board-container">
+                    <div id="board"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="screen">
+            <div class="glass-panel" style="background: rgba(0,0,0,0.5);">
+                <div class="trophy">🏆</div>
+                <h1 id="winner-text" style="font-size: clamp(3rem, 8vw, 4rem);">SIEG!</h1>
+                <p>Der Dominator des Feldes steht fest.</p>
+                <button class="btn btn-primary" onclick="returnToTournament()">Weiter im Turnier</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ROWS = 6;
+        let COLS = 6;
+        let board = [];
+        let currentPlayer = 1;
+        let moveCount = 1;
+        let isAnimating = false;
+        let gameActive = false;
+        let isBotTurn = false;
+        let playerTypes = {};
+
+        // Optionen & Status
+        let gameMode = 'modern';
+        let optBlackHolesActive = false;
+        let optWormHolesActive = false;
+        let optRetroThemeActive = false;
+        let wormholeCoords = [];
+        let revealedWormholesCount = 0;
+
+        let tournament = {
+            players: [], rounds: [], currentRoundIndex: 0, currentMatchIndex: 0, currentMatch: null
+        };
+
+        function getExplosionThreshold(r, c) {
+            let cap = board[r][c].capacity;
+            return (gameMode === 'modern') ? cap + 1 : cap;
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type, player = 1) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const t = audioCtx.currentTime;
+
+            if (optRetroThemeActive) {
+                // Retro 8-bit Sounds
+                if (type === 'place') {
+                    const osc = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(player === 1 ? 440 : 330, t);
+                    gainNode.gain.setValueAtTime(0.1, t);
+                    gainNode.gain.linearRampToValueAtTime(0, t + 0.1);
+                    osc.start(t); osc.stop(t + 0.1);
+                } else if (type === 'explode') {
+                    const osc = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+                    
+                    if (player === 1) {
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(400, t);
+                        osc.frequency.exponentialRampToValueAtTime(40, t + 0.15);
+                        gainNode.gain.setValueAtTime(0.15, t);
+                        gainNode.gain.linearRampToValueAtTime(0, t + 0.15);
+                        osc.start(t); osc.stop(t + 0.15);
+                    } else {
+                        osc.type = 'square';
+                        osc.frequency.setValueAtTime(120, t);
+                        osc.frequency.exponentialRampToValueAtTime(10, t + 0.3);
+                        gainNode.gain.setValueAtTime(0.15, t);
+                        gainNode.gain.linearRampToValueAtTime(0, t + 0.3);
+                        osc.start(t); osc.stop(t + 0.3);
+                    }
+                } else if (type === 'win') {
+                    const osc = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+                    osc.type = 'square';
+                    [440, 554, 659, 880].forEach((freq, i) => {
+                        osc.frequency.setValueAtTime(freq, t + i * 0.15);
+                    });
+                    gainNode.gain.setValueAtTime(0.1, t);
+                    gainNode.gain.linearRampToValueAtTime(0, t + 0.6);
+                    osc.start(t); osc.stop(t + 0.6);
+                } else if (type === 'mystery' || type === 'swallow' || type === 'tunnel') {
+                    const osc = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(200, t);
+                    osc.frequency.linearRampToValueAtTime(800, t + 0.1);
+                    osc.frequency.linearRampToValueAtTime(200, t + 0.2);
+                    gainNode.gain.setValueAtTime(0.1, t);
+                    gainNode.gain.linearRampToValueAtTime(0, t + 0.2);
+                    osc.start(t); osc.stop(t + 0.2);
+                }
+                return;
+            }
+
+            if (type === 'place') {
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+                if (player === 1) {
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(600, t); osc.frequency.exponentialRampToValueAtTime(1200, t + 0.1);
+                    gainNode.gain.setValueAtTime(0, t); gainNode.gain.linearRampToValueAtTime(0.3, t + 0.02); gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+                } else {
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(300, t); osc.frequency.exponentialRampToValueAtTime(150, t + 0.15);
+                    gainNode.gain.setValueAtTime(0, t); gainNode.gain.linearRampToValueAtTime(0.4, t + 0.02); gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+                }
+                osc.start(t); osc.stop(t + 0.3);
+            } else if (type === 'explode') {
+                const osc = audioCtx.createOscillator(); const gainNode = audioCtx.createGain();
+                if (player === 1) {
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(200, t); osc.frequency.exponentialRampToValueAtTime(450, t + 0.1); osc.frequency.exponentialRampToValueAtTime(50, t + 0.4);
+                    gainNode.gain.setValueAtTime(0, t); gainNode.gain.linearRampToValueAtTime(0.3, t + 0.05); gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+                    osc.connect(gainNode);
+                } else {
+                    osc.type = 'square'; osc.frequency.setValueAtTime(150, t); osc.frequency.exponentialRampToValueAtTime(30, t + 0.4);
+                    const filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.setValueAtTime(800, t); filter.frequency.exponentialRampToValueAtTime(100, t + 0.4);
+                    osc.connect(filter); filter.connect(gainNode);
+                    gainNode.gain.setValueAtTime(0, t); gainNode.gain.linearRampToValueAtTime(0.3, t + 0.05); gainNode.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+                }
+                gainNode.connect(audioCtx.destination); osc.start(t); osc.stop(t + 0.5);
+                const noise = audioCtx.createBufferSource(); const bufferSize = audioCtx.sampleRate * 0.3; const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const output = noiseBuffer.getChannelData(0); for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+                noise.buffer = noiseBuffer; const noiseFilter = audioCtx.createBiquadFilter();
+                if (player === 1) { noiseFilter.type = 'highpass'; noiseFilter.frequency.setValueAtTime(800, t); }
+                else { noiseFilter.type = 'lowpass'; noiseFilter.frequency.setValueAtTime(600, t); noiseFilter.frequency.exponentialRampToValueAtTime(100, t + 0.3); }
+                const noiseGain = audioCtx.createGain(); const startGain = player === 1 ? 0.05 : 0.15;
+                noiseGain.gain.setValueAtTime(startGain, t); noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+                noise.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(audioCtx.destination);
+                noise.start(t);
+            } else if (type === 'mystery') {
+                // Sound für Schwarzes Loch / Wurmloch Entdeckung
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, t); osc.frequency.exponentialRampToValueAtTime(800, t + 0.2);
+                gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(0.2, t + 0.1); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+                osc.start(t); osc.stop(t + 0.5);
+            } else if (type === 'swallow') {
+                // Sound für Verschlucken im Schwarzen Loch
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.type = 'sine'; osc.frequency.setValueAtTime(1000, t); osc.frequency.exponentialRampToValueAtTime(10, t + 0.3);
+                gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(0.3, t + 0.05); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+                osc.start(t); osc.stop(t + 1.0);
+            } else if (type === 'tunnel') {
+                // Sound für Tunnelt-Effekt im Wurmloch
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(210, t); osc.frequency.exponentialRampToValueAtTime(5200, t + 0.2);
+                gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(0.2, t + 0.05); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+                osc.start(t); osc.stop(t + 0.5);
+            } else if (type === 'win') {
+                [300, 375, 450, 600].forEach((freq, i) => {
+                    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                    osc.connect(gain); gain.connect(audioCtx.destination); osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, t + i * 0.1); gain.gain.setValueAtTime(0, t + i * 0.1); gain.gain.linearRampToValueAtTime(0.2, t + i * 0.1 + 0.05); gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.1 + 1);
+                    osc.start(t + i * 0.1); osc.stop(t + i * 0.1 + 1);
+                });
+            }
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function updatePlayerInputs() {
+            let count = parseInt(document.getElementById('player-count').value);
+            let container = document.getElementById('player-names-container');
+            container.innerHTML = '';
+            const sciFiNames = ["Materie", "Antimaterie", "Dunkle Materie", "Exotische Materie", "Tachyonen", "Positronen", "Neutrinos", "Quarks"];
+            for (let i = 0; i < count; i++) {
+                let defaultName = sciFiNames[i] || `Fraktion ${i + 1}`;
+                container.innerHTML += `<div class="setting-group" style="width:100%;"><label>Spieler ${i + 1}</label>
+                    <div style="display:flex; gap:10px; width:100%;">
+                        <input type="text" id="pname-${i}" value="${defaultName}" maxlength="15" style="flex:1; min-width:0;">
+                        <select id="ptype-${i}" style="flex:1; min-width:0; padding:12px 8px; font-size:1rem; border-radius:8px; background:rgba(0,0,0,0.3); color:var(--text-main); border:1px solid var(--glass-border);">
+                            <option value="human">Mensch</option>
+                            <option value="easy">KI (Leicht)</option>
+                            <option value="medium">KI (Mittel)</option>
+                            <option value="hard">KI (Schwer)</option>
+                        </select>
+                    </div>
+                </div>`;
+            }
+        }
+
+        function toggleRetroTheme(isActive) {
+            optRetroThemeActive = isActive;
+            if (isActive) document.body.classList.add('retro-theme');
+            else document.body.classList.remove('retro-theme');
+            if (typeof gameActive !== 'undefined' && gameActive) renderBoard();
+        }
+
+        window.onload = () => updatePlayerInputs();
+
+        function startTournament() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            toggleRetroTheme(document.getElementById('opt-retrotheme').checked);
+
+            let count = parseInt(document.getElementById('player-count').value);
+            let players = [];
+            playerTypes = {};
+            for (let i = 0; i < count; i++) {
+                let rawName = document.getElementById(`pname-${i}`).value.trim() || `Spieler ${i + 1}`;
+                let type = document.getElementById(`ptype-${i}`).value;
+                let name = rawName;
+                while (players.includes(name)) name += " I";
+                players.push(name);
+                playerTypes[name] = type;
+            }
+            if (players.length > 2) players.sort(() => Math.random() - 0.5);
+
+            let n = players.length; let p = 1;
+            while (p < n) p *= 2;
+            let byes = p - n;
+
+            let round1 = []; let index = 0;
+            for (let i = 0; i < byes; i++) round1.push({ p1: players[index++], p2: null, winner: null });
+            while (index < n) round1.push({ p1: players[index++], p2: players[index++], winner: null });
+
+            tournament.rounds = [round1]; tournament.currentRoundIndex = 0;
+            showScreen('tournament-screen'); renderTournamentScreen();
+        }
+
+        function renderTournamentScreen() {
+            let round = tournament.rounds[tournament.currentRoundIndex];
+            let titleEl = document.getElementById('round-title');
+
+            if (round.length === 4) titleEl.innerText = "VIERTELFINALE";
+            else if (round.length === 2) titleEl.innerText = "HALBFINALE";
+            else if (round.length === 1) titleEl.innerText = "FINALE";
+            else titleEl.innerText = `RUNDE ${tournament.currentRoundIndex + 1}`;
+
+            let html = ''; let allDone = true;
+            round.forEach((match, index) => {
+                if (!match.p2) {
+                    match.winner = match.p1;
+                    html += `<div class="match-card"><div class="match-vs">${match.p1}</div><div class="match-status" style="color: var(--p1-color);">[Freilos]</div></div>`;
+                } else if (match.winner) {
+                    html += `<div class="match-card"><div class="match-vs">${match.p1} <span style="color:var(--text-muted); font-size:0.8rem; margin:0 5px;">vs</span> ${match.p2}</div><div class="match-status winner-text">Sieger:<br>${match.winner}</div></div>`;
+                } else {
+                    allDone = false;
+                    html += `<div class="match-card active" onclick="startMatch(${index})"><div class="match-vs">${match.p1} <span style="color:var(--text-muted); font-size:0.8rem; margin:0 5px;">vs</span> ${match.p2}</div><div class="match-status btn-primary" style="padding: 5px 15px; border-radius: 6px; color: white;">Spielen</div></div>`;
+                }
+            });
+
+            if (allDone) {
+                if (round.length === 1) html += `<div style="text-align:center; margin-top: 40px;"><h2 style="color: var(--p1-color); font-size: 2rem; text-shadow: 0 0 20px var(--p1-glow);">TURNIERSIEGER</h2><h1 style="font-size: clamp(2.5rem, 8vw, 4rem); margin: 10px 0; line-height:1.2;">${round[0].winner}</h1><button class="btn btn-primary" onclick="showScreen('start-screen')" style="margin-top:20px;">Neues Turnier</button></div>`;
+                else html += `<div style="text-align:center; margin-top: 30px;"><button class="btn btn-primary" onclick="nextRound()">Nächste Runde starten</button></div>`;
+            }
+            document.getElementById('tournament-content').innerHTML = html;
+        }
+
+        function nextRound() {
+            let currentRound = tournament.rounds[tournament.currentRoundIndex];
+            let winners = currentRound.map(m => m.winner);
+            let nextRoundMatches = [];
+            for (let i = 0; i < winners.length; i += 2) {
+                if (i + 1 < winners.length) nextRoundMatches.push({ p1: winners[i], p2: winners[i + 1], winner: null });
+                else nextRoundMatches.push({ p1: winners[i], p2: null, winner: null });
+            }
+            tournament.rounds.push(nextRoundMatches); tournament.currentRoundIndex++;
+            renderTournamentScreen();
+        }
+
+        function startMatch(matchIndex) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            tournament.currentMatchIndex = matchIndex;
+            tournament.currentMatch = tournament.rounds[tournament.currentRoundIndex][matchIndex];
+
+            ROWS = parseInt(document.getElementById('board-size').value, 10);
+            COLS = ROWS;
+            gameMode = document.getElementById('opt-pailgame').checked ? 'pailgame' : 'modern';
+            optBlackHolesActive = document.getElementById('opt-blackholes').checked;
+            optWormHolesActive = document.getElementById('opt-wormholes').checked;
+
+            showScreen('game-screen');
+            resetGame();
+        }
+
+        function resetGame() {
+            board = [];
+            wormholeCoords = [];
+            revealedWormholesCount = 0;
+            let specialCells = [];
+            let numSpecials = (optBlackHolesActive ? 2 : 0) + (optWormHolesActive ? 2 : 0);
+
+            // Zufällige Positionen für Spezialfelder bestimmen (ohne Überlappung)
+            while (specialCells.length < numSpecials) {
+                let r = Math.floor(Math.random() * ROWS);
+                let c = Math.floor(Math.random() * COLS);
+                if (!specialCells.some(cell => cell.r === r && cell.c === c)) {
+                    specialCells.push({ r, c });
+                }
+            }
+
+            for (let r = 0; r < ROWS; r++) {
+                let row = [];
+                for (let c = 0; c < COLS; c++) {
+                    let capacity = 0;
+                    if (r > 0) capacity++;
+                    if (r < ROWS - 1) capacity++;
+                    if (c > 0) capacity++;
+                    if (c < COLS - 1) capacity++;
+
+                    row.push({
+                        owner: null,
+                        points: 0,
+                        capacity: capacity,
+                        type: 'normal',
+                        revealed: false
+                    });
+                }
+                board.push(row);
+            }
+
+            // Spezialfelder zuweisen
+            let sIndex = 0;
+            if (optBlackHolesActive) {
+                board[specialCells[sIndex].r][specialCells[sIndex].c].type = 'blackhole';
+                board[specialCells[sIndex + 1].r][specialCells[sIndex + 1].c].type = 'blackhole';
+                sIndex += 2;
+            }
+            if (optWormHolesActive) {
+                board[specialCells[sIndex].r][specialCells[sIndex].c].type = 'wormhole';
+                board[specialCells[sIndex + 1].r][specialCells[sIndex + 1].c].type = 'wormhole';
+                wormholeCoords.push({ r: specialCells[sIndex].r, c: specialCells[sIndex].c });
+                wormholeCoords.push({ r: specialCells[sIndex + 1].r, c: specialCells[sIndex + 1].c });
+            }
+
+            const boardEl = document.getElementById('board');
+            boardEl.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+            boardEl.style.gridTemplateRows = `repeat(${ROWS}, 1fr)`;
+            boardEl.innerHTML = '';
+
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.r = r; cell.dataset.c = c;
+
+                    const orb = document.createElement('div');
+                    orb.className = 'orb'; orb.id = `orb-${r}-${c}`;
+
+                    cell.appendChild(orb);
+                    cell.addEventListener('click', () => handleCellClick(r, c));
+                    boardEl.appendChild(cell);
+                }
+            }
+
+            currentPlayer = 1; moveCount = 1; isAnimating = false; gameActive = true;
+            updateUI(); renderBoard();
+        }
+
+        function handleCellClick(r, c) {
+            if (!gameActive || isAnimating || isBotTurn) return;
+            const cell = board[r][c];
+
+            // Regel: Schwarze Löcher blockieren den Klick nicht per se, fressen aber den Zug. 
+            // Man darf klicken, wenn Feld leer oder eigenes ist. (Schwarze Löcher bleiben immer leer/neutral).
+            if (cell.owner === null || cell.owner === currentPlayer) {
+                makeMove(r, c, currentPlayer);
+            }
+        }
+
+        // Neue Hilfsfunktion, um die Logik für Spezialfelder zu bündeln
+        function addParticleToCell(r, c, player) {
+            let cell = board[r][c];
+            let targetR = r;
+            let targetC = c;
+
+            // --- SCHWARZES LOCH ---
+            if (cell.type === 'blackhole') {
+                if (!cell.revealed) {
+                    cell.revealed = true;
+                    playSound('mystery');
+                } else {
+                    playSound('swallow');
+                }
+                // Partikel wird geschluckt (nichts weiter passiert)
+                return;
+            }
+
+            // --- WURMLOCH ---
+            if (cell.type === 'wormhole') {
+                if (!cell.revealed) {
+                    cell.revealed = true;
+                    revealedWormholesCount++;
+                    playSound('mystery');
+                } else if (revealedWormholesCount === 2) {
+                    playSound('tunnel');
+                }
+
+                // Wenn BEIDE Wurmlöcher offen sind, umleiten
+                if (revealedWormholesCount === 2) {
+                    const otherWormhole = wormholeCoords.find(w => w.r !== r || w.c !== c);
+                    targetR = otherWormhole.r;
+                    targetC = otherWormhole.c;
+                    cell = board[targetR][targetC]; // Ziel anpassen
+                }
+            }
+
+            // Partikel auf Ziel-Zelle anwenden
+            cell.points++;
+            cell.owner = player;
+        }
+
+        async function makeMove(r, c, player) {
+            isAnimating = true;
+
+            // Nur Sound spielen, wenn es nicht gerade ein verstecktes Schwarzes Loch ist (dafür gibts Mystery Sound)
+            if (board[r][c].type !== 'blackhole' || board[r][c].revealed) {
+                playSound('place', player);
+            }
+
+            addParticleToCell(r, c, player);
+            renderBoard();
+
+            await processExplosions();
+
+            if (gameActive) {
+                currentPlayer = currentPlayer === 1 ? 2 : 1;
+                moveCount++;
+                updateUI();
+                isAnimating = false;
+            }
+        }
+
+        async function processExplosions() {
+            let needsExplosion = true;
+
+            while (needsExplosion) {
+                let cellsToExplode = [];
+
+                for (let r = 0; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) {
+                        // Felder explodieren normal, AUCH Wurmlöcher wenn sie überlaufen
+                        if (board[r][c].points >= getExplosionThreshold(r, c)) {
+                            cellsToExplode.push({ r, c });
+                        }
+                    }
+                }
+
+                if (cellsToExplode.length > 0) {
+                    await new Promise(resolve => setTimeout(resolve, 250));
+                    playSound('explode', board[cellsToExplode[0].r][cellsToExplode[0].c].owner);
+
+                    cellsToExplode.forEach(({ r, c }) => {
+                        const cell = board[r][c];
+                        const owner = cell.owner;
+
+                        const orbEl = document.getElementById(`orb-${r}-${c}`);
+                        if (orbEl) {
+                            const animClass = (gameMode === 'modern') ? 'explode-anim-modern' : 'explode-anim';
+                            orbEl.classList.add(animClass);
+                            setTimeout(() => orbEl.classList.remove(animClass), 400);
+                        }
+
+                        cell.points -= cell.capacity;
+
+                        const neighbors = [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]];
+                        neighbors.forEach(([nr, nc]) => {
+                            if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
+                                // Über Helper-Funktion hinzufügen (wegen Spezialfeldern)
+                                addParticleToCell(nr, nc, owner);
+                            }
+                        });
+                    });
+
+                    renderBoard();
+
+                    if (checkWinCondition()) {
+                        needsExplosion = false; gameActive = false; showGameOver();
+                    }
+
+                } else {
+                    needsExplosion = false;
+                }
+            }
+        }
+
+        function checkWinCondition() {
+            let p1Count = 0; let p2Count = 0;
+            let totalValidCells = ROWS * COLS;
+
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    // Schwarze Löcher werden aus der Gesamtzahl der einnehmbaren Felder herausgerechnet
+                    if (board[r][c].type === 'blackhole') {
+                        totalValidCells--;
+                        continue;
+                    }
+                    if (board[r][c].owner === 1) p1Count++;
+                    if (board[r][c].owner === 2) p2Count++;
+                }
+            }
+
+            if (p1Count === totalValidCells) { currentPlayer = 1; return true; }
+            if (p2Count === totalValidCells) { currentPlayer = 2; return true; }
+            return false;
+        }
+
+        function showGameOver() {
+            setTimeout(() => {
+                playSound('win');
+                let winnerName = currentPlayer === 1 ? tournament.currentMatch.p1 : tournament.currentMatch.p2;
+                let textEl = document.getElementById('winner-text');
+                textEl.innerHTML = `${winnerName}`;
+                textEl.style.color = currentPlayer === 1 ? 'var(--p1-color)' : 'var(--p2-color)';
+                textEl.style.textShadow = `0 0 30px ${currentPlayer === 1 ? 'var(--p1-glow)' : 'var(--p2-glow)'}`;
+                showScreen('game-over-screen');
+            }, 800);
+        }
+
+        function returnToTournament() {
+            let winnerName = currentPlayer === 1 ? tournament.currentMatch.p1 : tournament.currentMatch.p2;
+            tournament.rounds[tournament.currentRoundIndex][tournament.currentMatchIndex].winner = winnerName;
+            showScreen('tournament-screen'); renderTournamentScreen();
+        }
+
+        function updateUI() {
+            document.getElementById('move-counter').innerText = `Zug ${moveCount.toString().padStart(4, '0')}`;
+            const indicator = document.getElementById('turn-indicator');
+            let activeName = currentPlayer === 1 ? tournament.currentMatch.p1 : tournament.currentMatch.p2;
+            indicator.innerText = activeName;
+
+            const boardEl = document.getElementById('board');
+            if (currentPlayer === 1) {
+                indicator.className = 'turn-indicator turn-p1';
+                boardEl.querySelectorAll('.cell').forEach(c => { c.classList.remove('hover-p2'); c.classList.add('hover-p1'); });
+            } else {
+                indicator.className = 'turn-indicator turn-p2';
+                boardEl.querySelectorAll('.cell').forEach(c => { c.classList.remove('hover-p1'); c.classList.add('hover-p2'); });
+            }
+
+            let pType = playerTypes[activeName];
+            if (pType && pType !== 'human') {
+                isBotTurn = true;
+                setTimeout(() => {
+                    triggerBotMove(pType);
+                }, 800);
+            } else {
+                isBotTurn = false;
+            }
+        }
+
+        function getActualTarget(r, c) {
+            let cell = board[r][c];
+            if (cell.type === 'wormhole' && revealedWormholesCount === 2) {
+                const other = wormholeCoords.find(w => w.r !== r || w.c !== c);
+                if (other) return { r: other.r, c: other.c, cell: board[other.r][other.c] };
+            }
+            return { r, c, cell };
+        }
+
+        function triggerBotMove(type) {
+            if (!gameActive) return;
+
+            let validMoves = [];
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    let cell = board[r][c];
+                    // Bekannte schwarze Löcher absolut meiden!
+                    if (cell.type === 'blackhole' && cell.revealed) continue;
+
+                    if (cell.owner === null || cell.owner === currentPlayer) {
+                        validMoves.push({ r, c });
+                    }
+                }
+            }
+
+            if (validMoves.length === 0) return; // Sollte nie passieren, außer Game Over
+
+            let bestMove = validMoves[0];
+
+            if (type === 'easy') {
+                // Leicht: Komplett zufälliger gültiger Zug
+                bestMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+            } else if (type === 'medium') {
+                // Mittel: Bevorzugt Felder, die eine sofortige Explosion (Kettenreaktion) auslösen
+                let explodingMoves = [];
+                for (let m of validMoves) {
+                    let target = getActualTarget(m.r, m.c);
+                    if (target.cell.points >= getExplosionThreshold(target.r, target.c) - 1) {
+                        explodingMoves.push(m);
+                    }
+                }
+                if (explodingMoves.length > 0) {
+                    bestMove = explodingMoves[Math.floor(Math.random() * explodingMoves.length)];
+                } else {
+                    bestMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+                }
+            } else if (type === 'hard') {
+                // Schwer: Punktebasiertes Auswertungssystem mit Risikoanalyse
+                let bestScore = -Infinity;
+                let candidates = [];
+
+                for (let m of validMoves) {
+                    let target = getActualTarget(m.r, m.c);
+                    let score = 0;
+
+                    // Löst das eigene Feld eine Explosion aus?
+                    if (target.cell.points >= getExplosionThreshold(target.r, target.c) - 1) {
+                        score += 100; // Sehr gut
+
+                        const neighbors = [[target.r - 1, target.c], [target.r + 1, target.c], [target.r, target.c - 1], [target.r, target.c + 1]];
+                        neighbors.forEach(([nr, nc]) => {
+                            if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
+                                let ntarget = getActualTarget(nr, nc);
+                                let ncell = ntarget.cell;
+                                if (ncell.owner !== null && ncell.owner !== currentPlayer) {
+                                    score += ncell.points * 10; // Gegnerische Partikel übernehmen bringt Punkte
+                                    if (ncell.points >= getExplosionThreshold(ntarget.r, ntarget.c) - 1) {
+                                        score += 50; // Bedrohlich starkes gegnerisches Feld übernehmen ist optimal!
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        // Defensive Bewertung: Vermeide direkt neben gegnerischen Feldern zu bauen, die kurz vor der Explosion stehen!
+                        let danger = false;
+                        const neighbors = [[target.r - 1, target.c], [target.r + 1, target.c], [target.r, target.c - 1], [target.r, target.c + 1]];
+                        neighbors.forEach(([nr, nc]) => {
+                            if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
+                                let ntarget = getActualTarget(nr, nc);
+                                let ncell = ntarget.cell;
+                                if (ncell.owner !== null && ncell.owner !== currentPlayer) {
+                                    if (ncell.points >= getExplosionThreshold(ntarget.r, ntarget.c) - 1) {
+                                        danger = true;
+                                    }
+                                }
+                            }
+                        });
+                        if (danger) {
+                            score -= 50; // Achtung Gefahr! Niemals hier etwas aufbauen!
+                        }
+
+                        // Positions-Strategie: Ecken (Kapazität 2) > Ränder (3) > Mitte (4)
+                        if (target.cell.capacity === 2) score += 5;
+                        else if (target.cell.capacity === 3) score += 2;
+
+                        // Bevorzuge es, bestehende eigene Felder aufzubauen statt komplett neue anzufangen
+                        if (target.cell.owner === currentPlayer) {
+                            score += 1;
+                        }
+                    }
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        candidates = [m];
+                    } else if (score === bestScore) {
+                        candidates.push(m);
+                    }
+                }
+                bestMove = candidates[Math.floor(Math.random() * candidates.length)];
+            }
+
+            makeMove(bestMove.r, bestMove.c, currentPlayer);
+        }
+
+        function renderBoard() {
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const cellData = board[r][c];
+                    const cellEl = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+                    const orbEl = cellEl.querySelector('.orb');
+
+                    // Daten für CSS Styling übergeben
+                    cellEl.dataset.owner = cellData.owner || '';
+                    cellEl.dataset.points = cellData.points;
+                    cellEl.dataset.type = cellData.type;
+                    cellEl.dataset.revealed = cellData.revealed;
+
+                    if (optRetroThemeActive) {
+                        orbEl.innerText = cellData.points > 0 ? cellData.points : '';
+                    } else {
+                        orbEl.innerText = cellData.points > 1 ? cellData.points : '';
+                    }
+                }
+            }
+            updateParticleStats();
+        }
+
+        function updateParticleStats() {
+            let p1Particles = 0;
+            let p2Particles = 0;
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (board[r][c].type === 'blackhole') continue;
+                    if (board[r][c].owner === 1) p1Particles += board[r][c].points;
+                    if (board[r][c].owner === 2) p2Particles += board[r][c].points;
+                }
+            }
+            const p1Name = tournament.currentMatch ? tournament.currentMatch.p1 : "Spieler 1";
+            const p2Name = tournament.currentMatch ? tournament.currentMatch.p2 : "Spieler 2";
+
+            const p1NameEl = document.getElementById('stat-p1-name');
+            const p2NameEl = document.getElementById('stat-p2-name');
+            if (p1NameEl) p1NameEl.innerText = p1Name;
+            if (p2NameEl) p2NameEl.innerText = p2Name;
+
+            const p1CountEl = document.getElementById('stat-p1-count');
+            const p2CountEl = document.getElementById('stat-p2-count');
+            const totalCountEl = document.getElementById('stat-total-count');
+            if (p1CountEl) p1CountEl.innerText = p1Particles;
+            if (p2CountEl) p2CountEl.innerText = p2Particles;
+            if (totalCountEl) totalCountEl.innerText = p1Particles + p2Particles;
+        }
+    </script>
+</body>
+
+</html>
